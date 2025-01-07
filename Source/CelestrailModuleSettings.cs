@@ -26,7 +26,8 @@ public class CelestrailModuleSettings : EverestModuleSettings
         public string CustomColorSix { get; set; }
         [SettingMaxLength(7)]
         public string CustomColorSeven { get; set; }
-        private Color[] ColorCache;
+
+        private Color[] ColorCache = [];
 
 
         public static bool ValidateColor(string hex)
@@ -82,17 +83,18 @@ public class CelestrailModuleSettings : EverestModuleSettings
         public Color[] GetColors(Color[] ExpectedColors)
         {
             if (ExpectedColors == ColorCache) {  return ExpectedColors; }
-            Queue<Color> colors = new Queue<Color>();
+            Queue<Color> colors = new();
 
-            string[] customColors = new string[]
-            {
+            string[] customColors =
+            [
                 CustomColorOne, CustomColorTwo, CustomColorThree,
                 CustomColorFour, CustomColorFive, CustomColorSix,
                 CustomColorSeven
-            };
+            ];
 
             foreach (var colorHex in customColors)
             {
+                if (string.IsNullOrEmpty(colorHex)) {  continue; }
                 if (colorHex.TrimStart('#') == "0" || colorHex == "#")
                 {
                     colors.Enqueue(Color.Transparent);
@@ -105,9 +107,11 @@ public class CelestrailModuleSettings : EverestModuleSettings
             }
 
             ColorCache = colors.ToArray();
+
             return ColorCache;
         }
     }
+
     [SettingSubText("This setting defines the hex Colors for the custom flag.\nAny invalid or empty colors are filtered out.\n enter '#', '0', or '#0' to make gaps in the trail.")]
     public CustomFlagMenu CustomFlag { get; set; } = new();
 

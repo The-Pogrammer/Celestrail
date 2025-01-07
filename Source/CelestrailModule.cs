@@ -1,4 +1,6 @@
 ﻿using System;
+using FMOD.Studio;
+using Monocle;
 
 namespace Celeste.Mod.Celestrail;
 
