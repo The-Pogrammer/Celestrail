@@ -17,6 +17,8 @@ namespace Celeste.Mod.Celestrail
         private float trailWidth; // Width of the trail
         private Color[] trailColors;
         private float yoffset;
+        private bool createCut = false;
+        private bool renderTrail = true;
 
         public TrailManager()
             : base()
@@ -24,6 +26,11 @@ namespace Celeste.Mod.Celestrail
             AddTag(Tags.Global);
             trailSegments = new Queue<TrailSegment>();
             UpdateTrail(TrailConfig.Trails[TrailConfig.FLAGTHEMES.Trans_Flag]);
+        }
+
+        public void cutTrail()
+        {
+            createCut = true;
         }
 
         private void UpdateSettingsValues()
@@ -84,8 +91,12 @@ namespace Celeste.Mod.Celestrail
             }
 
             // Add the player's current position to the trail
-            trailSegments.Enqueue(new TrailSegment(player.Center + Vector2.UnitY * yoffset, 1f)); // Alpha starts at 1
 
+            if (renderTrail)
+            {
+                trailSegments.Enqueue(new TrailSegment(player.Center + Vector2.UnitY * yoffset, 1f, createCut)); // Alpha starts at 1
+                createCut = false;
+            }
             // Remove older segments if the trail exceeds the maximum length
             while (trailSegments.Count > maxTrailLength)
             {
@@ -119,27 +130,26 @@ namespace Celeste.Mod.Celestrail
                 return;
             }
 
-            Vector2[] positions = new Vector2[trailSegments.Count];
-            float[] alphas = new float[trailSegments.Count];
-
-            int index = 0;
+            TrailSegment prevSegment = null;
             foreach (var segment in trailSegments)
             {
-                positions[index] = segment.Position;
-                alphas[index] = segment.Alpha;
-                index++;
-            }
-
-            for (int i = 0; i < positions.Length - 1; i++)
-            {
-                float alpha = alphas[i];
-                if (alpha <= 0)
+                if (prevSegment == null)
+                {
+                    prevSegment = segment;
                     continue;
+                }
 
-                Vector2 start = positions[i];
-                Vector2 end = positions[i + 1];
+                float alpha = prevSegment.Alpha;
+                if (alpha <= 0 || segment.Iscut)
+                {
+                    prevSegment = segment;
+                    continue;
+                }
 
-                // Draw quads for each color in the trans flag
+                Vector2 start = prevSegment.Position;
+                Vector2 end = segment.Position;
+
+                // Draw quads for each color
                 for (int j = 0; j < trailColors.Length; j++)
                 {
                     if (trailColors[j] == Color.Transparent)
@@ -156,6 +166,8 @@ namespace Celeste.Mod.Celestrail
                         trailWidth / trailColors.Length
                     );
                 }
+
+                prevSegment = segment;
             }
         }
 
@@ -163,11 +175,13 @@ namespace Celeste.Mod.Celestrail
         {
             public Vector2 Position;
             public float Alpha;
+            public bool Iscut;
 
-            public TrailSegment(Vector2 position, float alpha)
+            public TrailSegment(Vector2 position, float alpha, bool iscut = false)
             {
                 Position = position;
                 Alpha = alpha;
+                Iscut = iscut;
             }
         }
     }

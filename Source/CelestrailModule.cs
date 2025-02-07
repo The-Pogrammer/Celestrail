@@ -1,5 +1,6 @@
 ﻿using System;
 using FMOD.Studio;
+using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.Celestrail;
@@ -27,19 +28,30 @@ public class CelestrailModule : EverestModule {
 #endif
     }
 
+    public static TrailManager trailManager;
     public const string LoggerTag = nameof(CelestrailModule);
 
     public override void Load()
     {
         Everest.Events.LevelLoader.OnLoadingThread += AddTrailManager;
+        On.Celeste.PlayerHair.MoveHairBy += NewOnMoveHairBy;
     }
 
     public override void Unload() {
         Everest.Events.LevelLoader.OnLoadingThread -= AddTrailManager;
+        On.Celeste.PlayerHair.MoveHairBy -= NewOnMoveHairBy;
+    }
+
+    //thanks to bit8289 for the idea on how to do this
+    public static void NewOnMoveHairBy(On.Celeste.PlayerHair.orig_MoveHairBy orig, PlayerHair hair, Vector2 amount)
+    {
+        orig(hair, amount);
+        trailManager.cutTrail();
     }
 
     private static void AddTrailManager(Level level)
     {
-        level.Add(new TrailManager());
+        trailManager = new TrailManager();
+        level.Add(trailManager);
     }
 }
