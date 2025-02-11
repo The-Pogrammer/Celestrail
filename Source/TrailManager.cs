@@ -18,7 +18,6 @@ namespace Celeste.Mod.Celestrail
         private Color[] trailColors;
         private float yoffset;
         private bool createCut = false;
-        private bool renderTrail = true;
 
         public TrailManager()
             : base()
@@ -61,6 +60,13 @@ namespace Celeste.Mod.Celestrail
         public override void Update()
         {
             base.Update();
+
+            if (CelestrailModule.CelestrailSettings.ToggleTrail.Pressed && CelestrailModule.TrailToggleable)
+            {
+                CelestrailModule.CelestrailSettings.ToggleTrail.ConsumePress();
+                CelestrailModule.EnableTrail = !CelestrailModule.EnableTrail;
+            }
+
             player = Scene.Tracker.GetEntity<Player>();
 
             // If the player is null or in an intro state, we fade the trail out
@@ -92,11 +98,8 @@ namespace Celeste.Mod.Celestrail
 
             // Add the player's current position to the trail
 
-            if (renderTrail)
-            {
-                trailSegments.Enqueue(new TrailSegment(player.Center + Vector2.UnitY * yoffset, 1f, createCut)); // Alpha starts at 1
-                createCut = false;
-            }
+            trailSegments.Enqueue(new TrailSegment(player.Center + Vector2.UnitY * yoffset, 1f, createCut)); // Alpha starts at 1
+            createCut = false;
             // Remove older segments if the trail exceeds the maximum length
             while (trailSegments.Count > maxTrailLength)
             {
@@ -130,44 +133,47 @@ namespace Celeste.Mod.Celestrail
                 return;
             }
 
-            TrailSegment prevSegment = null;
-            foreach (var segment in trailSegments)
+            if (CelestrailModule.EnableTrail)
             {
-                if (prevSegment == null)
+                TrailSegment prevSegment = null;
+                foreach (var segment in trailSegments)
                 {
-                    prevSegment = segment;
-                    continue;
-                }
-
-                float alpha = prevSegment.Alpha;
-                if (alpha <= 0 || segment.Iscut)
-                {
-                    prevSegment = segment;
-                    continue;
-                }
-
-                Vector2 start = prevSegment.Position;
-                Vector2 end = segment.Position;
-
-                // Draw quads for each color
-                for (int j = 0; j < trailColors.Length; j++)
-                {
-                    if (trailColors[j] == Color.Transparent)
+                    if (prevSegment == null)
                     {
+                        prevSegment = segment;
                         continue;
                     }
-                    float offset = -trailWidth / 2 + (trailWidth / trailColors.Length) * j;
-                    Color color = trailColors[j] * alpha;
 
-                    Draw.Line(
-                        start + new Vector2(0, offset),
-                        end + new Vector2(0, offset),
-                        color,
-                        trailWidth / trailColors.Length
-                    );
+                    float alpha = prevSegment.Alpha;
+                    if (alpha <= 0 || segment.Iscut)
+                    {
+                        prevSegment = segment;
+                        continue;
+                    }
+
+                    Vector2 start = prevSegment.Position;
+                    Vector2 end = segment.Position;
+
+                    // Draw quads for each color
+                    for (int j = 0; j < trailColors.Length; j++)
+                    {
+                        if (trailColors[j] == Color.Transparent)
+                        {
+                            continue;
+                        }
+                        float offset = -trailWidth / 2 + (trailWidth / trailColors.Length) * j;
+                        Color color = trailColors[j] * alpha;
+
+                        Draw.Line(
+                            start + new Vector2(0, offset),
+                            end + new Vector2(0, offset),
+                            color,
+                            trailWidth / trailColors.Length
+                        );
+                    }
+
+                    prevSegment = segment;
                 }
-
-                prevSegment = segment;
             }
         }
 

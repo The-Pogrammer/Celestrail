@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using FMOD;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Monocle;
 
 namespace Celeste.Mod.Celestrail;
@@ -125,4 +126,8 @@ public class CelestrailModuleSettings : EverestModuleSettings
     public int TrailWidth { get; set; } = 15;
     [SettingRange(min: -3, max: 3)]
     public int YOffset { get; set; } = 0;
+
+
+    [DefaultButtonBinding(Buttons.X, Keys.H)]
+    public ButtonBinding ToggleTrail { get; set; }
 }

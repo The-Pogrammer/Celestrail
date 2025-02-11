@@ -29,6 +29,8 @@ public class CelestrailModule : EverestModule {
     }
 
     public static TrailManager trailManager;
+    public static bool TrailToggleable;
+    public static bool EnableTrail;
     public const string LoggerTag = nameof(CelestrailModule);
 
     public override void Load()
@@ -52,6 +54,8 @@ public class CelestrailModule : EverestModule {
     private static void AddTrailManager(Level level)
     {
         trailManager = new TrailManager();
+        EnableTrail = true;
+        TrailToggleable = true;
         level.Add(trailManager);
     }
 }
