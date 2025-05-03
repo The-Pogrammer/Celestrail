@@ -15,7 +15,7 @@ namespace Celeste.Mod.Celestrail
         private int maxTrailLength; // Maximum number of trail segments
         private float trailFadeSpeed; // Controls how fast the trail fades
         private float trailWidth; // Width of the trail
-        private Color[] trailColors;
+        public Color[] trailColors;
         private float yoffset;
         private bool createCut = false;
 

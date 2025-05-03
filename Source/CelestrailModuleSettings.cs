@@ -77,13 +77,9 @@ public class CelestrailModuleSettings : EverestModuleSettings
             return new Color(r / 255f, g / 255f, b / 255f, a / 255f);
         }
 
-
-
-
-
         public Color[] GetColors(Color[] ExpectedColors)
         {
-            if (ExpectedColors == ColorCache) {  return ExpectedColors; }
+            if (ExpectedColors == ColorCache) { return ExpectedColors; }
             Queue<Color> colors = new();
 
             string[] customColors =
@@ -95,7 +91,7 @@ public class CelestrailModuleSettings : EverestModuleSettings
 
             foreach (var colorHex in customColors)
             {
-                if (string.IsNullOrEmpty(colorHex)) {  continue; }
+                if (string.IsNullOrEmpty(colorHex)) { continue; }
                 if (colorHex.TrimStart('#') == "0" || colorHex == "#")
                 {
                     colors.Enqueue(Color.Transparent);
@@ -120,6 +116,7 @@ public class CelestrailModuleSettings : EverestModuleSettings
     [SettingRange(min: 10, max: 40)]
     public int MaxTrailLength { get; set; } = 20;
     [SettingRange(min: 3, max: 6)]
+
     [SettingSubText("Higher numbers fade faster.")]
     public int TrailFadeSpeed { get; set; } = 5;
     [SettingRange(min: 5, max: 15)]
@@ -127,7 +124,8 @@ public class CelestrailModuleSettings : EverestModuleSettings
     [SettingRange(min: -3, max: 3)]
     public int YOffset { get; set; } = 0;
 
-
     [DefaultButtonBinding(Buttons.X, Keys.H)]
     public ButtonBinding ToggleTrail { get; set; }
+
+    
 }
