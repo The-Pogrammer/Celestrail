@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using AsmResolver.PE.DotNet.ReadyToRun;
 using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 using Monocle;
+using System.Collections.Generic;
+using static MonoMod.InlineRT.MonoModRule;
 
 namespace Celeste.Mod.Celestrail
 {
@@ -18,6 +19,9 @@ namespace Celeste.Mod.Celestrail
         public Color[] trailColors;
         private float yoffset;
         private bool createCut = false;
+
+        private Vector2 lastPlayerPos;
+        private bool firstFrame = true;
 
         public TrailManager()
             : base()
@@ -57,33 +61,58 @@ namespace Celeste.Mod.Celestrail
             UpdateSettingsValues();
         }
 
-        public override void Update()
+        public void AfterPlayerUpdate()
         {
-            base.Update();
-
+            
             if (CelestrailModule.CelestrailSettings.ToggleTrail.Pressed && CelestrailModule.TrailToggleable)
             {
                 CelestrailModule.CelestrailSettings.ToggleTrail.ConsumePress();
                 CelestrailModule.EnableTrail = !CelestrailModule.EnableTrail;
             }
 
-            player = Scene.Tracker.GetEntity<Player>();
+            if (SceneAs<Level>() == null) return;
 
-            // If the player is null or in an intro state, we fade the trail out
+            player = SceneAs<Level>().Tracker.GetEntity<Player>();
+
+            if (SceneAs<Level>().Paused || SceneAs<Level>().wasPaused || player == null) return;
+
+            if (player != null)
+            {
+                Vector2 delta = player.Position - lastPlayerPos;
+
+                if (!firstFrame)
+                {
+                    float deltaLen = delta.Length();
+                    float speedLen = player.Speed.Length();
+
+                    bool carriedBySolid = player.LiftSpeed != Vector2.Zero;
+
+                    if (!carriedBySolid)
+                    {
+                        if (deltaLen > 6f && deltaLen > speedLen * 2.5f)
+                        {
+                            cutTrail();
+                        }
+                    }
+                }
+                else
+                    firstFrame = false;
+
+                lastPlayerPos = player.Position;
+            }
+
             if (player == null || !player.InControl)
             {
-                // Fade out all trail segments over time
                 foreach (var segment in trailSegments)
                 {
-                    segment.Alpha -= trailFadeSpeed; // Gradually reduce alpha to 0
+                    segment.Alpha -= trailFadeSpeed;
                 }
-
-                // Remove segments that are fully transparent
+            
                 while (trailSegments.Count > 0 && trailSegments.Peek().Alpha <= 0)
                 {
                     trailSegments.Dequeue();
                 }
-                return; // Early exit if the player is dead or in intro state
+                return;
             }
 
             // Update trail when player is alive
@@ -97,9 +126,9 @@ namespace Celeste.Mod.Celestrail
             }
 
             // Add the player's current position to the trail
-
             trailSegments.Enqueue(new TrailSegment(player.Center + Vector2.UnitY * yoffset, 1f, createCut)); // Alpha starts at 1
             createCut = false;
+
             // Remove older segments if the trail exceeds the maximum length
             while (trailSegments.Count > maxTrailLength)
             {
@@ -124,10 +153,12 @@ namespace Celeste.Mod.Celestrail
         {
             base.Render();
 
+
+            player = Scene.Tracker.GetEntity<Player>();
+            
             if (trailSegments.Count < 2)
                 return;
 
-            player = Scene.Tracker.GetEntity<Player>();
             if (player != null && !player.InControl)
             {
                 return;

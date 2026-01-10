@@ -37,11 +37,18 @@ public class CelestrailModule : EverestModule {
     {
         Everest.Events.LevelLoader.OnLoadingThread += AddTrailManager;
         On.Celeste.PlayerHair.MoveHairBy += NewOnMoveHairBy;
+        Everest.Events.Level.OnAfterUpdate += NewOnAfterUpdate;
     }
 
     public override void Unload() {
         Everest.Events.LevelLoader.OnLoadingThread -= AddTrailManager;
         On.Celeste.PlayerHair.MoveHairBy -= NewOnMoveHairBy;
+        Everest.Events.Level.OnAfterUpdate -= NewOnAfterUpdate;
+    }
+
+    private void NewOnAfterUpdate(Level level)
+    {
+        trailManager.AfterPlayerUpdate();
     }
 
     //thanks to bit8289 for the idea on how to do this
@@ -58,4 +65,5 @@ public class CelestrailModule : EverestModule {
         TrailToggleable = true;
         level.Add(trailManager);
     }
+
 }
