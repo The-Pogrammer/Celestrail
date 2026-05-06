@@ -124,7 +124,7 @@ public class CelestrailModuleSettings : EverestModuleSettings
     [SettingRange(min: -3, max: 3)]
     public int YOffset { get; set; } = 0;
 
-    [DefaultButtonBinding(Buttons.X, Keys.H)]
+    [DefaultButtonBinding(0, Keys.H)]
     public ButtonBinding ToggleTrail { get; set; }
 
     

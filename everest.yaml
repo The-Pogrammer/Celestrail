@@ -1,6 +1,6 @@
 - Name: Celestrail
-  Version: 1.5.0
+  Version: 1.5.3
   DLL: bin/Celestrail.dll
   Dependencies:
     - Name: EverestCore
-      Version: 1.5421.0
+      Version: 1.6286.0
