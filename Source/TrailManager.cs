@@ -48,6 +48,10 @@ namespace Celeste.Mod.Celestrail
         {
             trailColors = trail.colors;
             UpdateSettingsValues();
+            if (player != null) {
+                Depth = player.Depth + 1;
+            }
+            
             return;
         }
 
